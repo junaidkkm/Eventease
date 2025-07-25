@@ -1,41 +1,34 @@
+// routes/bookingRoutes.js
 import express from 'express';
-import { checkSchema } from 'express-validator';
 import {
   createBooking,
-  getAllBookings,
+  getBookingsByServiceProvider,
   getBookingsByUser,
-  getBookingsByProvider,
-  getBookingById,
-  updateBooking,
+  getAllBookings,
   updateBookingStatus,
-  deleteBooking
+  deleteBooking,
+  markBookingAsPaid
 } from '../controllers/bookingController.js';
-import { bookingValidation } from '../validators/bookingValidators.js';
 
 const router = express.Router();
 
-// Create a booking
-router.post('/create', checkSchema(bookingValidation), createBooking);
+// ✅ Create a booking (no payment)
+router.post('/create', createBooking);
 
-// Get all bookings
-router.get('/', getAllBookings);
+// ✅ Status update (Accepted, Rejected, etc.)
+router.put('/status/:bookingId', updateBookingStatus);
 
-// Get booking by ID
-router.get('/:id', getBookingById);
+// ✅ After payment success - mark as paid
+router.put('/mark-paid/:bookingId', markBookingAsPaid);
 
-// Get bookings by user ID
+// ✅ Fetch by service provider or user
+router.get('/serviceprovider/:serviceProviderId', getBookingsByServiceProvider);
 router.get('/user/:userId', getBookingsByUser);
 
-// Get bookings by service provider ID
-router.get('/serviceprovider/:serviceProviderId', getBookingsByProvider);
+// ✅ Admin: get all bookings
+router.get('/', getAllBookings);
 
-// Update entire booking
-router.put('/:bookingId', updateBooking);
-
-// Update only booking status
-router.put('/:bookingId/status', updateBookingStatus);
-
-// Delete a booking
-router.delete('/:bookingId', deleteBooking);
+// ✅ Delete booking
+router.delete('/:id', deleteBooking);
 
 export default router;

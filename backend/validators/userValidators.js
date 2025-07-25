@@ -1,5 +1,3 @@
-// backend/validators/userValidators.js
-
 import User from '../models/User.js';
 
 export const userRegisterValidation = {
@@ -19,9 +17,7 @@ export const userRegisterValidation = {
     custom: {
       options: async (email) => {
         const user = await User.findOne({ email });
-        if (user) {
-          throw new Error('Email already registered');
-        }
+        if (user) throw new Error('Email already registered');
         return true;
       },
     },
@@ -29,16 +25,18 @@ export const userRegisterValidation = {
   password: {
     in: ['body'],
     exists: { errorMessage: 'Password is required' },
-    notEmpty: { errorMessage: 'Password cannot be empty' },
-    isLength: {
-      options: { min: 8, max: 12 },
-      errorMessage: 'Password must be 8-12 characters',
-    },
-    matches: {
-      options: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/,
-      errorMessage: 'Password must contain uppercase, lowercase, number, and symbol',
-    },
+    notEmpty: { errorMessage: 'Password should not be empty' },
     trim: true,
+    isStrongPassword: {
+      options: {
+        minLength: 8,
+        minUppercase: 1,
+        minLowercase: 1,
+        minNumbers: 1,
+        minSymbols: 1,
+      },
+      errorMessage: 'Password should be strong (8+ characters, 1 upper, 1 lower, 1 number, 1 symbol)',
+    },
   },
   contact: {
     in: ['body'],
@@ -46,18 +44,24 @@ export const userRegisterValidation = {
     notEmpty: { errorMessage: 'Contact cannot be empty' },
     isLength: {
       options: { min: 10, max: 10 },
-      errorMessage: 'Contact must be exactly 10 digits',
+      errorMessage: 'Contact must be 10 digits',
     },
-    isNumeric: { errorMessage: 'Contact must contain only numbers' },
+    isNumeric: { errorMessage: 'Contact must be numeric' },
   },
+  location: {
+  in: ['body'],
+  exists: { errorMessage: 'Location is required' },
+  notEmpty: { errorMessage: 'Location cannot be empty' },
+  trim: true,
+},
+
 };
 
 export const userLoginValidation = {
   email: {
     in: ['body'],
     exists: { errorMessage: 'Email is required' },
-    notEmpty: { errorMessage: 'Email cannot be empty' },
-    isEmail: { errorMessage: 'Email format is invalid' },
+    isEmail: { errorMessage: 'Invalid email format' },
     normalizeEmail: true,
     trim: true,
   },
@@ -66,13 +70,9 @@ export const userLoginValidation = {
     exists: { errorMessage: 'Password is required' },
     notEmpty: { errorMessage: 'Password cannot be empty' },
     isLength: {
-      options: { min: 8, max: 12 },
-      errorMessage: 'Password must be 8-12 characters',
+      options: { min: 8, max: 20 },
+      errorMessage: 'Password must be 8-20 characters',
     },
-    matches: {
-      options: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/,
-      errorMessage: 'Password must contain uppercase, lowercase, number, and symbol',
-    },
-    trim: true,
+    
   },
 };

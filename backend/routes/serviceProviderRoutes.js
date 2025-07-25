@@ -1,27 +1,33 @@
 import express from 'express';
-import { checkSchema } from 'express-validator';
-import {serviceProviderRegisterValidation,serviceProviderLoginValidation,} from '../validators/serviceProviderValidators.js';
-import {registerServiceProvider,loginServiceProvider,getAllServiceProviders,getServiceProviderById,updateServiceProvider,deleteServiceProvider,} from '../controllers/serviceProviderController.js';
-import handleValidationErrors from '../middlewares/handleValidationErrors.js';
+import {
+  registerServiceProvider,
+  loginServiceProvider,
+  getAllServiceProviders,
+  getServiceProviderById,
+  updateServiceProvider,
+  deleteServiceProvider,
+  verifyServiceProviderOtp,
+  getSPEarnings
+} from '../controllers/serviceProviderController.js';
+
+import upload from '../middlewares/uploadMiddleware.js';
 
 const router = express.Router();
 
-// Register
-router.post('/register',checkSchema(serviceProviderRegisterValidation),handleValidationErrors,registerServiceProvider);
+// ✅ Registration & Login
+router.post('/register', upload.single('profilePic'), registerServiceProvider);
+router.post('/login', loginServiceProvider);
+router.post('/verify-otp', verifyServiceProviderOtp); // ✅ MUST come before :id routes
 
-// Login
-router.post('/login',checkSchema(serviceProviderLoginValidation),handleValidationErrors,loginServiceProvider);
-
-// Get all service providers
+// ✅ Public - Browse Service Providers
 router.get('/', getAllServiceProviders);
 
-// Get a single service provider by ID
+// ✅ SP Revenue Panel
+router.get('/earnings/:id', getSPEarnings);
+
+// ✅ ⚠️ KEEP THESE LAST
 router.get('/:id', getServiceProviderById);
-
-// Update a service provider by ID
-router.put('/:id', updateServiceProvider);
-
-// Delete a service provider by ID
+router.put('/:id', upload.single('profilePic'), updateServiceProvider); // ✅ ADDED upload middleware here
 router.delete('/:id', deleteServiceProvider);
 
 export default router;

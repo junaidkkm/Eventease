@@ -26,20 +26,27 @@ export const serviceProviderRegisterValidation = {
       },
     },
   },
-  password: {
-    in: ['body'],
-    exists: { errorMessage: 'Password is required' },
-    notEmpty: { errorMessage: 'Password cannot be empty' },
-    isLength: {
-      options: { min: 8, max: 12 },
-      errorMessage: 'Password must be 8–12 characters',
+  password:{
+        in:['body'],
+        exists:{
+            errorMessage:'password field is required'
+        },
+        notEmpty:{
+            errorMessage:"password filed should not be empty"
+        },
+        trim:true,
+        isStrongPassword:{
+            options:{
+                minLength:8,
+                minUpperCase:1,
+                minLowerCase:1,
+                minNumber:1,
+                minSymbol:1
+            },
+            errorMessage:"password length sould be 8 charecter and password sould contain 1 number, 1 symbol, 1 uppercase, 1 lowercase"
+        }
     },
-    matches: {
-      options: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/,
-      errorMessage: 'Password must contain uppercase, lowercase, number, and symbol',
-    },
-    trim: true,
-  },
+
   contact: {
     in: ['body'],
     exists: { errorMessage: 'Contact is required' },
@@ -62,19 +69,27 @@ export const serviceProviderRegisterValidation = {
     notEmpty: { errorMessage: 'Service cannot be empty' },
     trim: true,
   },
+    role: {
+    in: ['body'],
+    optional: true, // allow frontend to skip it; backend default will apply
+    isIn: {
+      options: [['serviceprovider']],
+      errorMessage: 'Role must be serviceprovider',
+    },
+  },
+
 };
 
 export const serviceProviderLoginValidation = {
   email: {
-    in: ['body'],
-    exists: { errorMessage: 'Email is required' },
+    notEmpty: { errorMessage: 'Email is required' },
     isEmail: { errorMessage: 'Invalid email format' },
-    trim: true,
   },
   password: {
-    in: ['body'],
-    exists: { errorMessage: 'Password is required' },
-    notEmpty: { errorMessage: 'Password cannot be empty' },
-    trim: true,
+    notEmpty: { errorMessage: 'Password is required' },
+    isLength: {
+      options: { min: 1 },
+      errorMessage: 'Password cannot be empty',
+    },
   },
 };

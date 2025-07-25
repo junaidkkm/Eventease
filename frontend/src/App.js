@@ -1,59 +1,106 @@
+// App.js
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import './index.css';
+import { Routes, Route } from 'react-router-dom';
 
-import Login from './components/Login';
-import Dashboard from './components/Dashboard';
-import Profile from './components/Profile';
-import PrivateRoute from './components/PrivateRoute';
-import BookingList from './components/BookingList';
-
-import RegisterSelection from './pages/RegisterSelection'; // New page to select user/provider
-import UserRegister from './pages/UserRegister';
-import ServiceProviderRegister from './pages/ServiceProviderRegister';
-
+import Login from './pages/Login';
+import Register from './pages/Register';
 import UserDashboard from './pages/UserDashboard';
-import ServiceProviderDashboard from './pages/ServiceProviderDashboard';
-import ServiceProviderPage from './pages/ServiceProviderPage';
+import ServiceProviderDashboard from './pages/ServiceProviderDashboard'; // ✅ Corrected import
+import AdminDashboard from './pages/AdminDashboard';
+import UserProfile from './pages/UserProfile';
+import ServiceProviderProfile from './pages/ServiceProviderProfile';
+import UserBookingPage from './pages/UserBookingPage';
+import ServiceProviderBookingPage from './pages/ServiceProviderBookingPage';
+import ServiceProviderPublicProfile from './pages/ServiceProviderPublicProfile';
+import BookingForm from './pages/BookingForm';
+import ForgotPassword from './pages/ForgotPassword';
+
+import PrivateRoute from './components/PrivateRoute';
+import Navbar from './components/Navbar';
 
 const App = () => {
   return (
-    <Router>
+    <>
+      <Navbar />
       <Routes>
-        {/* Default route shows register selection */}
-        <Route path='/' element={<RegisterSelection />} />
+        {/* Public Routes */}
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/service-provider/:id" element={<ServiceProviderPublicProfile />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* Login */}
-        <Route path='/login' element={<Login />} />
+        {/* Protected Routes */}
+        <Route
+          path="/user/dashboard"
+          element={
+            <PrivateRoute allowedRoles={['user']}>
+              <UserDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/user/profile"
+          element={
+            <PrivateRoute allowedRoles={['user']}>
+              <UserProfile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/my-bookings"
+          element={
+            <PrivateRoute allowedRoles={['user']}>
+              <UserBookingPage />
+            </PrivateRoute>
+          }
+        />
 
-        {/* Register routes */}
-        <Route path='/register/user' element={<UserRegister />} />
-        <Route path='/register/provider' element={<ServiceProviderRegister />} />
+        <Route
+          path="/serviceprovider/dashboard"
+          element={
+            <PrivateRoute allowedRoles={['serviceprovider']}>
+              <ServiceProviderDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/serviceprovider/profile"
+          element={
+            <PrivateRoute allowedRoles={['serviceprovider']}>
+              <ServiceProviderProfile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/serviceprovider/bookings"
+          element={
+            <PrivateRoute allowedRoles={['serviceprovider']}>
+              <ServiceProviderBookingPage />
+            </PrivateRoute>
+          }
+        />
 
-        {/* Dashboard routes */}
-        <Route path='/dashboard' element={
-          <PrivateRoute>
-            <Dashboard />
-          </PrivateRoute>
-        } />
-        <Route path='/user/dashboard' element={<UserDashboard />} />
-        <Route path='/provider/dashboard' element={<ServiceProviderDashboard />} />
+        <Route
+          path="/book/:providerId"
+          element={
+            <PrivateRoute allowedRoles={['user']}>
+              <BookingForm />
+            </PrivateRoute>
+          }
+        />
 
-        {/* Service Providers Page */}
-        <Route path='/providers' element={<ServiceProviderPage />} />
-
-        {/* Profile and Bookings (private) */}
-        <Route path='/profile' element={
-          <PrivateRoute>
-            <Profile />
-          </PrivateRoute>
-        } />
-        <Route path='/bookings' element={
-          <PrivateRoute>
-            <BookingList />
-          </PrivateRoute>
-        } />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <PrivateRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </PrivateRoute>
+          }
+        />
       </Routes>
-    </Router>
+    </>
   );
 };
 

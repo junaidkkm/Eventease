@@ -1,18 +1,16 @@
+// src/app/store.js (or wherever your store file is located)
+
+// src/app/store.js
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '../features/auth/authSlice';
 import bookingReducer from '../features/booking/bookingSlice';
-import serviceProviderReducer from '../features/serviceProvider/serviceProviderSlice';
 
-
-export const store = configureStore({
+const store = configureStore({
   reducer: {
     auth: authReducer,
-    serviceprovider: serviceProviderReducer,
     booking: bookingReducer,
   },
 });
 
-
-
-
+export default store;
 

@@ -4,31 +4,65 @@ const bookingSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
+    required: true
   },
   serviceProviderId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'ServiceProvider',
-    required: true,
+    required: true
   },
   service: {
     type: String,
-    required: true,
+    required: true
   },
   date: {
     type: Date,
-    required: true,
+    required: true
+  },
+  startTime: {
+    type: Number, // hour in 24-hour format
+    required: true
+  },
+  endTime: {
+    type: Number,
+    required: true
+  },
+  hours: {
+    type: Number,
+    required: true
+  },
+  hourlyRate: {
+    type: Number,
+    required: true
+  },
+  totalAmount: {
+    type: Number,
+    required: true
+  },
+  adminCommission: {
+    type: Number,
+    default: 0
+  },
+  serviceProviderEarnings: {
+    type: Number,
+    default: 0
   },
   status: {
     type: String,
-    enum: ['pending', 'confirmed', 'completed', 'canceled'],
-    default: 'pending',
+    enum: [ 'Accepted', 'Rejected'],
+    default: 'Pending'
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
+  isPaid: {
+    type: Boolean,
+    default: false
   },
+  paymentDetails: {
+    razorpay_order_id: String,
+    razorpay_payment_id: String,
+    razorpay_signature: String
+  }
+}, {
+  timestamps: true
 });
 
-const Booking = mongoose.model('Booking', bookingSchema);
-export default Booking;
+export default mongoose.model('Booking', bookingSchema);

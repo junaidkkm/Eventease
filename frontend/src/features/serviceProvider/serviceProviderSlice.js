@@ -1,102 +1,142 @@
-// src/features/serviceprovider/serviceProviderSlice.js
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/serviceprovider';
+const API = 'http://localhost:5001/api/serviceprovider';
 
-// 🔹 Fetch all service providers
-export const fetchProviders = createAsyncThunk(
-  'provider/fetchProviders',
-  async (_, thunkAPI) => {
+// 🔹 Register Service Provider
+export const registerServiceProvider = createAsyncThunk(
+  'serviceProvider/register',
+  async (formData, thunkAPI) => {
     try {
-      const res = await axios.get(API_URL);
-      return res.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || 'Failed to fetch providers'
-      );
+      const res = await axios.post(`${API}/register`, formData);
+      return res.data.user;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response?.data?.message || 'Registration failed');
     }
   }
 );
 
-// 🔹 Fetch single provider profile
-export const fetchProviderProfile = createAsyncThunk(
-  'provider/fetchProfile',
-  async (id, thunkAPI) => {
+// 🔹 Login Service Provider
+export const loginServiceProvider = createAsyncThunk(
+  'serviceProvider/login',
+  async ({ email, password }, thunkAPI) => {
     try {
-      const res = await axios.get(`${API_URL}/${id}`);
-      return res.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || 'Failed to fetch provider profile'
-      );
+      const res = await axios.post(`${API}/login`, { email, password });
+      return res.data.user;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response?.data?.message || 'Login failed');
     }
   }
 );
 
-// 🔹 Update provider profile
-export const updateProviderProfile = createAsyncThunk(
-  'provider/updateProfile',
+// 🔹 Update Profile
+export const updateServiceProvider = createAsyncThunk(
+  'serviceProvider/update',
   async ({ id, data }, thunkAPI) => {
     try {
-      const res = await axios.put(`${API_URL}/${id}`, data);
-      return res.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || 'Failed to update provider profile'
-      );
+      const res = await axios.put(`${API}/${id}`, data);
+      return res.data.user;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response?.data?.message || 'Update failed');
     }
   }
 );
 
-const providerSlice = createSlice({
-  name: 'provider',
-  initialState: {
-    provider: null,        // For single provider profile
-    providers: [],         // For provider list
-    loading: false,
-    error: null,
+// 🔹 Fetch All Service Providers
+export const fetchAllServiceProviders = createAsyncThunk(
+  'serviceProvider/fetchAll',
+  async (_, thunkAPI) => {
+    try {
+      const res = await axios.get(`${API}`);
+      return res.data.providers;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response?.data?.message || 'Failed to fetch providers');
+    }
+  }
+);
+
+// 🧱 Initial State
+const initialState = {
+  provider: (() => {
+    try {
+      const stored = localStorage.getItem('userInfo');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  })(),
+  allProviders: [], // ✅ needed for browse page
+  status: 'idle',
+  error: null,
+};
+
+// 🔄 Slice
+const serviceProviderSlice = createSlice({
+  name: 'serviceProvider',
+  initialState,
+  reducers: {
+    logoutProvider: (state) => {
+      state.provider = null;
+      localStorage.removeItem('userInfo');
+    },
   },
-  reducers: {},
   extraReducers: (builder) => {
     builder
-      // Fetch all providers
-      .addCase(fetchProviders.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+      // Register
+      .addCase(registerServiceProvider.pending, (state) => {
+        state.status = 'loading';
       })
-      .addCase(fetchProviders.fulfilled, (state, action) => {
-        state.loading = false;
-        state.providers = action.payload;
+      .addCase(registerServiceProvider.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.provider = action.payload;
+        localStorage.setItem('userInfo', JSON.stringify(action.payload));
       })
-      .addCase(fetchProviders.rejected, (state, action) => {
-        state.loading = false;
+      .addCase(registerServiceProvider.rejected, (state, action) => {
+        state.status = 'failed';
         state.error = action.payload;
       })
 
-      // Fetch single provider profile
-      .addCase(fetchProviderProfile.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+      // Login
+      .addCase(loginServiceProvider.pending, (state) => {
+        state.status = 'loading';
       })
-      .addCase(fetchProviderProfile.fulfilled, (state, action) => {
-        state.loading = false;
+      .addCase(loginServiceProvider.fulfilled, (state, action) => {
+        state.status = 'succeeded';
         state.provider = action.payload;
+        localStorage.setItem('userInfo', JSON.stringify(action.payload));
       })
-      .addCase(fetchProviderProfile.rejected, (state, action) => {
-        state.loading = false;
+      .addCase(loginServiceProvider.rejected, (state, action) => {
+        state.status = 'failed';
         state.error = action.payload;
       })
 
-      // Update provider profile
-      .addCase(updateProviderProfile.fulfilled, (state, action) => {
+      // Update
+      .addCase(updateServiceProvider.fulfilled, (state, action) => {
+        state.status = 'succeeded';
         state.provider = action.payload;
+        localStorage.setItem('userInfo', JSON.stringify(action.payload));
       })
-      .addCase(updateProviderProfile.rejected, (state, action) => {
+
+      // Fetch All Providers
+      .addCase(fetchAllServiceProviders.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchAllServiceProviders.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.allProviders = action.payload;
+      })
+      .addCase(fetchAllServiceProviders.rejected, (state, action) => {
+        state.status = 'failed';
         state.error = action.payload;
       });
   },
 });
 
-export default providerSlice.reducer;
+// 🔽 Exports
+export const { logoutProvider } = serviceProviderSlice.actions;
+export const selectServiceProvider = (state) => state.serviceProvider.provider;
+export const selectAllProviders = (state) => state.serviceProvider.allProviders;
+export const selectProviderStatus = (state) => state.serviceProvider.status;
+export const selectProviderError = (state) => state.serviceProvider.error;
+
+export default serviceProviderSlice.reducer;
